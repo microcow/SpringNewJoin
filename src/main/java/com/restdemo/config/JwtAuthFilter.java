@@ -32,9 +32,11 @@ public class JwtAuthFilter extends OncePerRequestFilter { // 요청당 필터가
     @Autowired
     UserService userService;
 
-    @Override // doFilterInternal 메서드가 최초로 호출되게 된다 (오버라이딩)
+    @Override 
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
+    	// JwtAuthFilter 실행 시 doFilterInternal 메서드가 최초로 호출되게 된다 (OncePerRequestFilter 오버라이딩하고 있기 때문)
+    	// 해당 필터는 Security에 의해 호출되는데 doFilterInternal 메서드를 호출하도록 내부적으로 설정되어있나봄
+    	
         String authHeader = request.getHeader("Authorization"); // 요청의 헤더에서 "Authorization" 헤더 값을 가져옵니다.
         String token = null;
         String username = null;

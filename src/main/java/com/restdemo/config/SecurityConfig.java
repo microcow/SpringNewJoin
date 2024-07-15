@@ -21,7 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-//이 클래스는 Spring Security 설정을 담당하는 클래스임을 나타냅니다.
+// 이 클래스는 Spring Security 설정을 담당하는 클래스임을 나타냅니다.
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity 
@@ -30,7 +30,7 @@ public class SecurityConfig {
     @Autowired
     JwtAuthFilter jwtAuthFilter;
 
-    @Bean
+    @Bean // ★ 사용자가 화면을 클릭하거나 요청을 보낼경우 Controller에 도달하기 전에 Spring Security의 필터 체인를 먼저 거친다 (내부적으로 그렇게 설정되어있음)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 보호를 비활성화
@@ -45,9 +45,9 @@ public class SecurityConfig {
                         // STATLESS : 서버가 세션을 관리하지 않도록 함
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class).build();
-        		// jwtAuthFilter를 UsernamePasswordAuthenticationFilter 앞에 추가합니다.
+        		// jwtAuthFilter를 UsernamePasswordAuthenticationFilter 앞에 실행하도록 추가.
         		// 이 메서드는 필터의 실행 순서를 제어하고, 특정 필터를 필터 체인의 특정 위치에 추가하기 위해 사용됩니다.
-        		// 새 요청이 오면 controller를 타기 전에 jwtAuthFilter로 먼저 이동하게 된다.
+        		// 즉, 새 요청이 오면 controller를 타기 전에 만들어 둔 jwtAuthFilter 클래스로 먼저 이동하게 된다.
     }
 
     @Bean
@@ -62,9 +62,9 @@ public class SecurityConfig {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         // DaoAuthenticationProvider를 사용하여 사용자 인증을 처리
         // DaoAuthenticationProvider : DB에 접근하여 입력된 값을 확인하는 메서드 (만약 메모리에 접근하여 확인하고 싶을 경우 DaoAuthenticationProvider가 아닌 InMemoryAuthenticationProvider클래스를 사용해야함)
-        authenticationProvider.setUserDetailsService(userDetailsService); // 유저 정보를 불러움
-        authenticationProvider.setPasswordEncoder(passwordEncoder);
+        authenticationProvider.setUserDetailsService(userDetailsService); // 유저 정보 세팅
+        authenticationProvider.setPasswordEncoder(passwordEncoder); // 유저 비밀번호 세팅
 
-        return new ProviderManager(authenticationProvider);
+        return new ProviderManager(authenticationProvider); // 세팅된 값과 유저가 입력한 값이 일치하는지 확인
     }
 }

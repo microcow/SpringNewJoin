@@ -12,7 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@RestController // 리턴되는 정보가 json 형태로 리턴된다
 public class UserController {
 
     @Autowired
