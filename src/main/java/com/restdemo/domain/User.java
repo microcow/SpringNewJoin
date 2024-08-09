@@ -11,7 +11,7 @@ public class User implements UserDetails {
 
     private String username;	//u_id
     private String password;		//u_password
-    private String uName;			//u_name
+    private String email;			//u_name
     private String uDateTime;	//u_datetime
 
     //security 관련
@@ -23,15 +23,16 @@ public class User implements UserDetails {
     private boolean isEnabled;
 
 
-    public String getuName() {
-        return uName;
-    }
 
-    public void setuName(String uName) {
-        this.uName = uName;
-    }
+    public String getEmail() {
+		return email;
+	}
 
-    public String getuDateTime() {
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getuDateTime() {
         return uDateTime;
     }
 
@@ -110,7 +111,7 @@ public class User implements UserDetails {
 
     @Override
     public String toString() {
-        return "User [username=" + username + ", password=" + password + ", uName=" + uName + ", uDateTime=" + uDateTime
+        return "User [username=" + username + ", password=" + password + ", uName=" + email + ", uDateTime=" + uDateTime
                 + ", authorities=" + authorities + ", isAccountNonExpired=" + isAccountNonExpired
                 + ", isAccountNonLocked=" + isAccountNonLocked + ", isCredentialsNonExpired=" + isCredentialsNonExpired
                 + ", isEnabled=" + isEnabled + "]";
