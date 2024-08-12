@@ -16,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController // 리턴되는 정보가 json 형태로 리턴된다
-public class UserController {
+public class UserController { //
 
   
     @Autowired 
