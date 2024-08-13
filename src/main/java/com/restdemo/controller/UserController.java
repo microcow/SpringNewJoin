@@ -16,16 +16,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController // 리턴되는 정보가 json 형태로 리턴된다
-public class UserController { //
+public class UserController {
 
-  
-    @Autowired 
+ 
+    @Autowired
     JwtService jwtService;
-    @Autowired 
+    @Autowired
     UserService userservice;
-    @Autowired 
+    @Autowired
     PasswordEncoder passwordEncoder;
-    
+   
     @Autowired
     AuthenticationManager authenticationManager;
 
@@ -45,12 +45,9 @@ public class UserController { //
             throw new UsernameNotFoundException("invalid user request..!!");
         }
     }
-    
+   
     @PostMapping("/api/Signup")
     public JwtResponseDTO Signup(@RequestBody User user){
-    	System.out.println(user.getEmail());
-    	System.out.println(user.getPassword());
-    	System.out.println(user.getUsername());
     	
     	user.setPassword(passwordEncoder.encode(user.getPassword())); // BCryptPasswordEncoder를 주입받음 (BCryptPasswordEncoder 객체를 생성한 후, encode 메서드를 사용하여 비밀번호를 인코딩)
     	userservice.createUser(user);
@@ -61,11 +58,30 @@ public class UserController { //
     	
     	return AuthenticateAndGetToken(token);
     }
-    
-    
+   
+    @PostMapping("/api/Signin")
+    public JwtResponseDTO Signin(@RequestBody User user){ // 프론트에서 값을 전달받지 못하고있음
+    	System.out.println(user); //
+    	User getUser = userservice.readUser(user.getUsername());
+    	
+    	if (getUser.getUsername().equals(user.getUsername()) ||
+    		getUser.getPassword().equals(user.getPassword())) {
+    	
+    	AuthRequestDTO token = new AuthRequestDTO();
+    	token.setUsername(getUser.getUsername());
+    	token.setPassword(getUser.getPassword());
+    	
+    	System.out.println("success");
+    	
+    	return AuthenticateAndGetToken(token);
+    	}
+    	else return null;
+    }
+   
+   
     // @PreAuthorize 어노테이션을 사용하여 특정 메서드가 실행되기 전에 접근 권한을 확인할 수 있습니다.
     // 이 메서드는 ROLE_ADMIN 권한을 가진 사용자만 호출할 수 있음
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')") 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/ping")
     public String test() {
         try {
@@ -74,7 +90,7 @@ public class UserController { //
             throw new RuntimeException(e);
         }
     }
-    
+   
     // 이 메서드는 ROLE_USER 권한을 가진 사용자이면서, username 파라미터 값이 현재 사용자와 동일한 경우에만 호출할 수 있음
     @PreAuthorize("hasRole('ROLE_USER') and #username == authentication.principal.username")
     public void userSpecificOperation(String username) {  

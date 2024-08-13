@@ -6,7 +6,7 @@
         SELECT         u_auth
         FROM         sb_auth
         WHERE          1=1
-        AND            u_email = #{email} <!-- 여기서 오류가 발생함 -->
+        AND            u_id = #{username} <!-- 여기서 오류가 발생함 -->
     </select>
 
     <!-- 회원 불러오기 -->
@@ -47,14 +47,14 @@
     <!-- 유저 권한 추가 -->
     <insert id="createAuthority" parameterType="org.springframework.security.core.GrantedAuthority">
         INSERT INTO sb_auth (
-        u_email,
+        u_id,
         u_auth
         ) VALUES
         <foreach item="authority" index="index" collection="authorities" separator=",">
-            (#{email}, #{authority.role})
+            (#{username}, #{authority.role})
         </foreach>
         ON DUPLICATE KEY
         UPDATE
-        u_email = #{email}
+        u_id = #{username}
     </insert>
 </mapper>
