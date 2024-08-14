@@ -6,7 +6,7 @@
         SELECT         u_auth
         FROM         sb_auth
         WHERE          1=1
-        AND            u_id = #{username} <!-- 여기서 오류가 발생함 -->
+        AND            u_id = #{email}
     </select>
 
     <!-- 회원 불러오기 -->
@@ -51,10 +51,10 @@
         u_auth
         ) VALUES
         <foreach item="authority" index="index" collection="authorities" separator=",">
-            (#{username}, #{authority.role})
+            (#{email}, #{authority.role})
         </foreach>
         ON DUPLICATE KEY
         UPDATE
-        u_id = #{username}
+        u_id = #{email}
     </insert>
 </mapper>
