@@ -51,7 +51,7 @@ public class UserController {
     public JwtResponseDTO Signup(@RequestBody User user){
     	
     	user.setPassword(passwordEncoder.encode(user.getPassword())); // BCryptPasswordEncoder를 주입받음 (BCryptPasswordEncoder 객체를 생성한 후, encode 메서드를 사용하여 비밀번호를 인코딩)
-    	userservice.createUser(user); ////프론트에서 보내는 username의 값이 username에 매칭되지 않네(프론트 문제임)
+    	userservice.createUser(user);
     	
     	AuthRequestDTO token = new AuthRequestDTO();
     	token.setUsername(user.getUsername());
@@ -59,20 +59,20 @@ public class UserController {
     	
     	return AuthenticateAndGetToken(token);
     }
-    @Secured({"ROLE_USER"})
+    
     @PostMapping("/api/Signin")
-    public JwtResponseDTO Signin(@RequestBody User user){ // 프론트에서 값을 전달받지 못하고있음
+    public JwtResponseDTO Signin(@RequestBody User user){
     	User getUser = userservice.readUser(user.getUsername());
-    	
-    	if (getUser.getUsername().equals(user.getUsername()) ||
+    	System.out.println(getUser.getPassword());
+    	if (getUser.getEmail().equals(user.getUsername()) || // 프론트에서 username 객체에 email정보를 보내고 있기에 user.getUsername은 이메일 형식임
     		getUser.getPassword().equals(user.getPassword())) {
     	
     	AuthRequestDTO token = new AuthRequestDTO();
-    	token.setUsername(getUser.getUsername());
+    	token.setUsername(getUser.getEmail());
     	token.setPassword(getUser.getPassword());
     	
     	System.out.println("success");
-    	
+    	JwtResponseDTO DTO = AuthenticateAndGetToken(token);
     	return AuthenticateAndGetToken(token);
     	}
     	else return null;
