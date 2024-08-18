@@ -28,16 +28,13 @@ public class UserController {
     PasswordEncoder passwordEncoder;
    
     @Autowired
-    AuthenticationManager authenticationManager;
-
-    @GetMapping("/hello")
-    public User greeting(@RequestParam(value = "name", defaultValue = "World") String name) {
-        return new User();
-    }
+    AuthenticationManager authenticationManager; // 해당 authenticationManager객체는 authenticationManager메서드의 결과(return)를 담고있음
 
     @PostMapping("/api/SetToken")
     public JwtResponseDTO AuthenticateAndGetToken(@RequestBody AuthRequestDTO authRequestDTO){ // @RequestBody 애노테이션은 프론트에서 보낸 요청의 본문(즉, body)을 Java 객체로 변환하는 데 사용
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername(), authRequestDTO.getPassword()));
+        Authentication authentication = authenticationManager.authenticate(
+        		new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername(), authRequestDTO.getPassword()));
+        // 실제로 입력받은 값과 db의 정보를 비교 및 인증하는 과정은 위 코드에서 일어남. 인증 성공 시 토큰 return (위 과정에서 username을 가지고 authenticationManager메서드에서 설정한 loadUserByUsername도 호출하고 비밀번호를 Bcrypt방식으로 비교도 함)
         if(authentication.isAuthenticated()){
             JwtResponseDTO jwtResponseDTO = new JwtResponseDTO();
             jwtResponseDTO.setAccessToken(jwtService.GenerateToken(authRequestDTO.getUsername()));
@@ -45,6 +42,11 @@ public class UserController {
         } else {
             throw new UsernameNotFoundException("invalid user request..!!");
         }
+    }
+    
+    @GetMapping("/hello")
+    public User greeting(@RequestParam(value = "name", defaultValue = "World") String name) {
+        return new User();
     }
    
     @PostMapping("/api/Signup")
@@ -64,16 +66,15 @@ public class UserController {
     public JwtResponseDTO Signin(@RequestBody User user){
     	User getUser = userservice.readUser(user.getUsername());
     	System.out.println(getUser.getPassword());
-    	if (getUser.getEmail().equals(user.getUsername()) || // 프론트에서 username 객체에 email정보를 보내고 있기에 user.getUsername은 이메일 형식임
+    	if (getUser.getEmail().equals(user.getUsername()) || // 프론트에서 username 객체에 email정보를 보내고 있기에 user.getUsername은 이메일 형식임(SignUp에서는 email객체에 email정보를 담아서 보내고있음(차이점))
     		getUser.getPassword().equals(user.getPassword())) {
     	
     	AuthRequestDTO token = new AuthRequestDTO();
-    	token.setUsername(getUser.getEmail());
-    	token.setPassword(getUser.getPassword());
+    	token.setUsername(user.getUsername());
+    	token.setPassword(user.getPassword()); // 입력받은 값과 db에 저장된 값이 일치하는지 인증해야되기 때문에 암호화된 비밀번호가 아닌 유저에게 입력받은 값을 세팅해야함
     	
     	System.out.println("success");
-    	JwtResponseDTO DTO = AuthenticateAndGetToken(token);
-    	return AuthenticateAndGetToken(token);
+    	return AuthenticateAndGetToken(token);// token 생성 과정에서 시큐리티의 authenticationManager메서드가 호출됨
     	}
     	else return null;
     }

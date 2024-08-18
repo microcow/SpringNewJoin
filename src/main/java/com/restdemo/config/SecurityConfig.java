@@ -63,9 +63,9 @@ public class SecurityConfig {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         // DaoAuthenticationProvider를 사용하여 사용자 인증을 처리 (이 과정에서 loadUserByUsername이 호출되는 듯)
         // DaoAuthenticationProvider : DB에 접근하여 입력된 값을 확인하는 메서드 (만약 메모리에 접근하여 확인하고 싶을 경우 DaoAuthenticationProvider가 아닌 InMemoryAuthenticationProvider클래스를 사용해야함)
-        authenticationProvider.setUserDetailsService(userDetailsService); // 유저 정보 세팅
-        authenticationProvider.setPasswordEncoder(passwordEncoder); // 유저 비밀번호 세팅
+        authenticationProvider.setUserDetailsService(userDetailsService); // 유저 정보를 가져올 준비(userDetailsService객체는 UserDetailsService를 구현중인 클래스)
+        authenticationProvider.setPasswordEncoder(passwordEncoder); // 비밀번호를 비교할 때 사용할 PasswordEncoder를 설정
 
-        return new ProviderManager(authenticationProvider); // 세팅된 값과 유저가 입력한 값이 일치하는지 확인
+        return new ProviderManager(authenticationProvider); // 설정 방식을 return (해당 메서드에서 직접 인증이 진행되지 않음. 비교를 위한 준비만)
     }
 }
