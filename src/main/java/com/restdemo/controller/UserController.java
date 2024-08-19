@@ -3,10 +3,13 @@ package com.restdemo.controller;
 import com.restdemo.domain.AuthRequestDTO;
 import com.restdemo.domain.JwtResponseDTO;
 import com.restdemo.domain.User;
+import com.restdemo.domain.UserAlreadyExistsException;
 import com.restdemo.service.JwtService;
 import com.restdemo.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -50,16 +53,22 @@ public class UserController {
     }
    
     @PostMapping("/api/Signup")
-    public JwtResponseDTO Signup(@RequestBody User user){
+    public ResponseEntity<Void> Signup(@RequestBody User user){
     	
     	user.setPassword(passwordEncoder.encode(user.getPassword())); // BCryptPasswordEncoder를 주입받음 (BCryptPasswordEncoder 객체를 생성한 후, encode 메서드를 사용하여 비밀번호를 인코딩)
-    	userservice.createUser(user);
     	
-    	AuthRequestDTO token = new AuthRequestDTO();
-    	token.setUsername(user.getUsername());
-    	token.setPassword(user.getPassword());
+    	 try {
+             userservice.createUser(user);
+             return ResponseEntity.ok().build();  // HTTP 200 OK 반환
+         } catch (DuplicateKeyException e) {
+             // 중복된 이메일일 경우 커스텀 예외를 던집니다.
+        	 throw new UserAlreadyExistsException("User with email " + user.getEmail() + " already exists.", e);
+             // DuplicateKeyException은 RuntimeException의 자식클래스 (RuntimeException클래스를 UserAlreadyExistsException쿨래스가 상속받고있음)
+             // 모든 UserAlreadyExistsException은 GlobalExceptionHandler에서 글로벌하게 관리됨
+             // 즉, DuplicateKeyException이 발생하면 UserAlreadyExistsException로 포장하여 GlobalExceptionHandler로 보내짐
+         }
     	
-    	return AuthenticateAndGetToken(token);
+ 
     }
     
     @PostMapping("/api/Signin")
