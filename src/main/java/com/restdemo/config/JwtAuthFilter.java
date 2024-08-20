@@ -43,6 +43,7 @@ public class JwtAuthFilter extends OncePerRequestFilter { // 요청당 필터가
         if(authHeader != null && authHeader.startsWith("Bearer ")){ // Authorization 헤더가 null이 아니고 "Bearer "로 시작하는지 확인합니다.
             token = authHeader.substring(7); // "Bearer " 이후의 문자열을 토큰으로 사용합니다.
             username = jwtService.extractUsername(token); // 토큰에서 사용자명을 추출합니다.
+            System.out.println("11");
         }
 
         if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){ // 사용자명이 null이 아니고, 현재 SecurityContext에 인증 정보가 없는 경우 처리합니다.
@@ -51,9 +52,11 @@ public class JwtAuthFilter extends OncePerRequestFilter { // 요청당 필터가
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()); // 인증 토큰을 생성합니다.
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));  // 요청 세부 정보를 설정합니다.
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken); // SecurityContext에 인증 정보를 설정합니다.
+                System.out.println("22");
             }
 
         }
+        System.out.println("33");
 
         filterChain.doFilter(request, response);
     }

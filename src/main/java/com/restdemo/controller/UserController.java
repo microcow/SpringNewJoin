@@ -1,20 +1,26 @@
 package com.restdemo.controller;
 
 import com.restdemo.domain.AuthRequestDTO;
+import com.restdemo.domain.Board;
 import com.restdemo.domain.JwtResponseDTO;
 import com.restdemo.domain.User;
 import com.restdemo.domain.UserAlreadyExistsException;
 import com.restdemo.service.JwtService;
 import com.restdemo.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -86,6 +92,13 @@ public class UserController {
     	return AuthenticateAndGetToken(token);// token 생성 과정에서 시큐리티의 authenticationManager메서드가 호출됨
     	}
     	else return null;
+    }
+    
+    @PostMapping("/api/CreateBoard")
+    public void CreateBoard(@RequestBody Board board, @AuthenticationPrincipal UserDetails userDetails){
+    	System.out.println(board.getContents());
+        
+
     }
    
    
