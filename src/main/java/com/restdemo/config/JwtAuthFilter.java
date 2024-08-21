@@ -49,7 +49,6 @@ public class JwtAuthFilter extends OncePerRequestFilter { // 요청당 필터가
 
         if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){ // 사용자명이 null이 아니고, 현재 SecurityContext에 인증 정보가 없는 경우 처리합니다.
             UserDetails userDetails = userService.loadUserByUsername(username); // 사용자 정보 로드
-            System.out.println("11");
             if(jwtService.validateToken(token, userDetails)){ // 토큰이 유효한지 확인합니다.
             	// ★★ validateToken 메서드 내에서 getUsername 메서드를 사용하기 때문에 유저를 구분할 수 있는 Primary key값을 username 인스턴스 변수에 저장해주어야함 (★java security의 UserDetails객체를 쓰기 때문에 무조건 username 인스턴스 변수에 저장해주어야함★) 
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()); // 인증 토큰을 생성합니다.

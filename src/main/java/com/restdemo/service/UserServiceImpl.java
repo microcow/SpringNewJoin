@@ -42,9 +42,7 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.readUser(username);
         user.setAuthorities(getAuthorities(username));
 
-        System.out.println("loadUserByUsername");
-
-        return user;
+        return user; // User가 UserDetails를 구현 중이므로 업캐스팅되어 return됨
     }
 
     @Override
