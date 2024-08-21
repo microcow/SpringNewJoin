@@ -82,7 +82,6 @@ public class UserController {
     
     @PostMapping("/api/Signin")
     public JwtResponseDTO Signin(@RequestBody User user){
-    	System.out.println("ddzzd");
     	User getUser = userservice.readUser(user.getUsername());
     	if (getUser.getEmail().equals(user.getUsername()) || // 프론트에서 username 객체에 email정보를 보내고 있기에 user.getUsername은 이메일 형식임(SignUp에서는 email객체에 email정보를 담아서 보내고있음(차이점))
     		getUser.getPassword().equals(user.getPassword())) {
