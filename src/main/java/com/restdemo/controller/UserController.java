@@ -47,7 +47,10 @@ public class UserController {
         if(authentication.isAuthenticated()){
             JwtResponseDTO jwtResponseDTO = new JwtResponseDTO();
             jwtResponseDTO.setAccessToken(jwtService.GenerateToken(authRequestDTO.getUsername()));
-            return jwtResponseDTO;
+            /* 토큰을 JwtResponseDTO 클래스의 객체에 accessToken이라는 인스턴스 변수에 setAccessToken 메서드를 통해 저장하고 있음
+               그래서, 프론트에서 return받는 객체이름이 responseData라고 가정하면 responseData.accessToken 이렇게 서버에서 보낸 토큰값을 불러와야함
+            */
+            return jwtResponseDTO; // 만약 이미 토큰을 발급받은 유저가 다시 로그인할 경우 
         } else {
             throw new UsernameNotFoundException("invalid user request..!!");
         }
@@ -79,8 +82,8 @@ public class UserController {
     
     @PostMapping("/api/Signin")
     public JwtResponseDTO Signin(@RequestBody User user){
+    	System.out.println("ddzzd");
     	User getUser = userservice.readUser(user.getUsername());
-    	System.out.println(getUser.getPassword());
     	if (getUser.getEmail().equals(user.getUsername()) || // 프론트에서 username 객체에 email정보를 보내고 있기에 user.getUsername은 이메일 형식임(SignUp에서는 email객체에 email정보를 담아서 보내고있음(차이점))
     		getUser.getPassword().equals(user.getPassword())) {
     	
@@ -88,7 +91,6 @@ public class UserController {
     	token.setUsername(user.getUsername());
     	token.setPassword(user.getPassword()); // 입력받은 값과 db에 저장된 값이 일치하는지 인증해야되기 때문에 암호화된 비밀번호가 아닌 유저에게 입력받은 값을 세팅해야함
     	
-    	System.out.println("success");
     	return AuthenticateAndGetToken(token);// token 생성 과정에서 시큐리티의 authenticationManager메서드가 호출됨
     	}
     	else return null;

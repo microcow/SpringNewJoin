@@ -14,7 +14,7 @@
     <select id="readUser" parameterType="String" resultType="User">
         SELECT         u_email                 	as   email,
         u_password             					as password,
-        u_name                						as   username,
+        u_email                						as   username,
         u_isAccountNonExpired        as isAccountNonExpired,
         u_isAccountNonLocked    	    as isAccountNonLocked,
         u_isCredentialNonExpired    as isCredentialsNonExpired,
