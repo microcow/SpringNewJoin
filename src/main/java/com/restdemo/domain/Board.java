@@ -4,7 +4,6 @@ public class Board {
 	String name;
 	String title;
 	String contents;
-	String email;
 	int p_board;
 	int depth;
 	int grpord;
@@ -28,12 +27,6 @@ public class Board {
 	}
 	public void setContents(String contents) {
 		this.contents = contents;
-	}
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
 	}
 	public int getP_board() {
 		return p_board;

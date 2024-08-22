@@ -5,6 +5,7 @@ import com.restdemo.domain.Board;
 import com.restdemo.domain.JwtResponseDTO;
 import com.restdemo.domain.User;
 import com.restdemo.domain.UserAlreadyExistsException;
+import com.restdemo.service.BoardService;
 import com.restdemo.service.JwtService;
 import com.restdemo.service.UserService;
 
@@ -35,7 +36,8 @@ public class UserController {
     UserService userservice;
     @Autowired
     PasswordEncoder passwordEncoder;
-   
+    @Autowired
+    BoardService boardservice;    
     @Autowired
     AuthenticationManager authenticationManager; // 해당 authenticationManager객체는 authenticationManager메서드의 결과(return)를 담고있음
 
@@ -62,7 +64,7 @@ public class UserController {
     }
    
     @PostMapping("/api/Signup")
-    public ResponseEntity<Void> Signup(@RequestBody User user){
+    public ResponseEntity<Void> Signup(@RequestBody User user){ // ResponseEntity<Void>는 상태 코드만 반환하고, 추가적인 응답 본문이 필요 없는 경우 사용
     	
     	user.setPassword(passwordEncoder.encode(user.getPassword())); // BCryptPasswordEncoder를 주입받음 (BCryptPasswordEncoder 객체를 생성한 후, encode 메서드를 사용하여 비밀번호를 인코딩)
     	
@@ -95,10 +97,17 @@ public class UserController {
     	else return null;
     }
     
+    @Secured({"ROLE_USER"})
     @PostMapping("/api/CreateBoard")
-    public void CreateBoard(@RequestBody Board board, @AuthenticationPrincipal UserDetails userDetails){
-    	System.out.println(board.getContents());
-        
+    public String CreateBoard(@RequestBody Board board, @AuthenticationPrincipal UserDetails userDetails){ // @AuthenticationPrincipal UserDetails userDetails : 인증된 사용자 정보를 가져옴
+    	
+    	if(board.getContents() != null || board.getTitle() != null) {
+    		board.setName(userDetails.getUsername());
+    		boardservice.createBoard(board);
+    		return "Complete!";
+    	}
+    	else
+    	return "someting wrong...";
 
     }
    
