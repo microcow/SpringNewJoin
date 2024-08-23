@@ -4,7 +4,7 @@
     
     
     <!-- 게시글 등록 -->
-    <insert id="createBoard" parameterType="Board">
+    <insert id="createBoard" parameterType="Board" useGeneratedKeys="true" keyProperty="p_board">
         INSERT INTO sb_board (
         b_writer,
         b_title,

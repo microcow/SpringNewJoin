@@ -99,11 +99,25 @@ public class UserController {
     
     @Secured({"ROLE_USER"})
     @PostMapping("/api/CreateBoard")
-    public String CreateBoard(@RequestBody Board board, @AuthenticationPrincipal UserDetails userDetails){ // @AuthenticationPrincipal UserDetails userDetails : 인증된 사용자 정보를 가져옴
+    public String CreateBoard(@RequestBody Board board, @AuthenticationPrincipal UserDetails userDetails){ // ★ @AuthenticationPrincipal UserDetails userDetails : doFilterInternal메서드에서 인증처리 후 인증된 사용자 정보를 받음
     	
     	if(board.getContents() != null || board.getTitle() != null) {
     		board.setName(userDetails.getUsername());
-    		boardservice.createBoard(board);
+    		boardservice.createBoard(board); ////08 23 여기까지 함 
+    		
+    		if (board.getP_board() != 0) {// 답글일 경우 부모 bId 값을 p_board값으로 저장
+    			board.setP_board(board.getP_board()); // 답글일 경우 부모 p_board 값을 p_board값으로 저장
+    			board.setDepth(board.getDepth()+1); // 답글일 경우 부모 depth값 +1
+    			//boardservice.updateGrpord(board); // 같은 p_board를 가진 게시글 부모 grpord값보다 큰 grpord를 가진 게시글의 grpord값 +1씩 더하기
+    			board.setGrpord(board.getGrpord()+1); // +1씩 더하면 부모 grpord값 +1의 값은 비게되니까 본인이 부모 grpord값 +1로 설정
+    			//board.setbTitle("ㄴ" + board.getbTitle()); // 답글일 경우 제목 앞에 ㄴ 추가
+    			}
+    			else {// 원글일 경우 자신의 bId값을 p_board값으로 저장, depth 1로 설정, grpord 0으로 설정
+    				board.setP_board(board.getP_board());
+    				board.setDepth(1);
+    				board.setGrpord(0);
+    			}
+    		
     		return "Complete!";
     	}
     	else

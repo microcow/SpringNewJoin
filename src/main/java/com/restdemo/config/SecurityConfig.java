@@ -37,7 +37,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests((req) -> req // 요청에 대한 인가 규칙을 설정
                         .requestMatchers(new AntPathRequestMatcher("/api/Signin")).permitAll() // /api/login은 모든 사용자에게 접근을 허용 (new AntPathRequestMatcher 생략 가능)
                         .requestMatchers(new AntPathRequestMatcher("/api/Signup")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/CreateBoard")).permitAll()
                         .requestMatchers("/api/**").authenticated() // /api/**는 인증된 사용자에게만 접근을 허용 (new AntPathRequestMatcher 생략)
                         .anyRequest().permitAll() // 나머지 요청은 모든 사용자에게 허용
                 )
