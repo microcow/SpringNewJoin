@@ -11,6 +11,9 @@ import com.restdemo.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpHeaders;
@@ -44,7 +47,7 @@ public class UserController {
     @PostMapping("/api/SetToken")
     public JwtResponseDTO AuthenticateAndGetToken(@RequestBody AuthRequestDTO authRequestDTO){ // @RequestBody 애노테이션은 프론트에서 보낸 요청의 본문(즉, body)을 Java 객체로 변환하는 데 사용
         Authentication authentication = authenticationManager.authenticate(
-        		new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername(), authRequestDTO.getPassword()));
+        	new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername(), authRequestDTO.getPassword()));
         // 실제로 입력받은 값과 db의 정보를 비교 및 인증하는 과정은 위 코드에서 일어남. 인증 성공 시 토큰 return (위 과정에서 username을 가지고 authenticationManager메서드에서 설정한 loadUserByUsername도 호출하고 비밀번호를 Bcrypt방식으로 비교도 함)
         if(authentication.isAuthenticated()){
             JwtResponseDTO jwtResponseDTO = new JwtResponseDTO();
@@ -63,7 +66,7 @@ public class UserController {
         return new User();
     }
    
-    @PostMapping("/api/Signup")
+    @PostMapping("/api/Signup") // Signup은 시큐리티에서 .permitAll() 처리 되었기에 인증되지 않은 이용자도 접근 가능 
     public ResponseEntity<Void> Signup(@RequestBody User user){ // ResponseEntity<Void>는 상태 코드만 반환하고, 추가적인 응답 본문이 필요 없는 경우 사용
     	
     	user.setPassword(passwordEncoder.encode(user.getPassword())); // BCryptPasswordEncoder를 주입받음 (BCryptPasswordEncoder 객체를 생성한 후, encode 메서드를 사용하여 비밀번호를 인코딩)
@@ -83,7 +86,7 @@ public class UserController {
     }
     
     @PostMapping("/api/Signin")
-    public JwtResponseDTO Signin(@RequestBody User user){
+    public JwtResponseDTO Signin(@RequestBody User user){ // Signin은 시큐리티에서 .permitAll() 처리 되었기에 인증되지 않은 이용자도 접근 가능 
     	User getUser = userservice.readUser(user.getUsername());
     	if (getUser.getEmail().equals(user.getUsername()) || // 프론트에서 username 객체에 email정보를 보내고 있기에 user.getUsername은 이메일 형식임(SignUp에서는 email객체에 email정보를 담아서 보내고있음(차이점))
     		getUser.getPassword().equals(user.getPassword())) {
@@ -103,27 +106,40 @@ public class UserController {
     	
     	if(board.getContents() != null || board.getTitle() != null) {
     		board.setName(userDetails.getUsername());
-    		boardservice.createBoard(board); ////08 23 여기까지 함 
     		
-    		if (board.getP_board() != 0) {// 답글일 경우 부모 bId 값을 p_board값으로 저장
-    			board.setP_board(board.getP_board()); // 답글일 경우 부모 p_board 값을 p_board값으로 저장
-    			board.setDepth(board.getDepth()+1); // 답글일 경우 부모 depth값 +1
-    			//boardservice.updateGrpord(board); // 같은 p_board를 가진 게시글 부모 grpord값보다 큰 grpord를 가진 게시글의 grpord값 +1씩 더하기
-    			board.setGrpord(board.getGrpord()+1); // +1씩 더하면 부모 grpord값 +1의 값은 비게되니까 본인이 부모 grpord값 +1로 설정
-    			//board.setbTitle("ㄴ" + board.getbTitle()); // 답글일 경우 제목 앞에 ㄴ 추가
-    			}
-    			else {// 원글일 경우 자신의 bId값을 p_board값으로 저장, depth 1로 설정, grpord 0으로 설정
-    				board.setP_board(board.getP_board());
-    				board.setDepth(1);
-    				board.setGrpord(0);
-    			}
+    		boardservice.createBoard(board);
     		
+    		board.setP_board(board.getB_id());
+    		board.setDepth(1);
+    		board.setGrpord(0);
+    			
+    		boardservice.updateBoard(board);
+    
     		return "Complete!";
     	}
     	else
     	return "someting wrong...";
-
     }
+    
+    @Secured({"ROLE_USER"})
+    @PostMapping("/api/BoardList")
+    public List<Board> BoardList(@AuthenticationPrincipal UserDetails userDetails){ // ★ @AuthenticationPrincipal UserDetails userDetails : doFilterInternal메서드에서 인증처리 후 인증된 사용자 정보를 받음
+    	List<Board> boardList = new ArrayList();
+    	boardList = boardservice.boardList();
+    	
+    	return boardList;
+    }
+    
+    @Secured({"ROLE_USER"})
+    @PostMapping("/api/BoardDetail")
+    public Board BoardDetail(@RequestBody String b_id, @AuthenticationPrincipal UserDetails userDetails){ // ★ @AuthenticationPrincipal UserDetails userDetails : doFilterInternal메서드에서 인증처리 후 인증된 사용자 정보를 받음
+    	Board board = new Board();
+    	board = boardservice.readBoard(Integer.parseInt(b_id));
+    	
+    	return board;
+    }
+    
+    
    
    
     // @PreAuthorize 어노테이션을 사용하여 특정 메서드가 실행되기 전에 접근 권한을 확인할 수 있습니다.

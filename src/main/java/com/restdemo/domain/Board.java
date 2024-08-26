@@ -4,12 +4,19 @@ public class Board {
 	String name;
 	String title;
 	String contents;
+	int b_id;
 	int p_board;
 	int depth;
 	int grpord;
 	String b_datetime;
 	
 	
+	public int getB_id() {
+		return b_id;
+	}
+	public void setB_id(int b_id) {
+		this.b_id = b_id;
+	}
 	public String getName() {
 		return name;
 	}

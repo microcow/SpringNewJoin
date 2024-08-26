@@ -4,7 +4,7 @@
     
     
     <!-- 게시글 등록 -->
-    <insert id="createBoard" parameterType="Board" useGeneratedKeys="true" keyProperty="p_board">
+    <insert id="createBoard" parameterType="Board" useGeneratedKeys="true" keyProperty="b_id">
         INSERT INTO sb_board (
         b_writer,
         b_title,
@@ -15,6 +15,40 @@
         #{contents}      
         )
     </insert>
+    
+    <select id="readBoard" parameterType="int" resultType="Board">
+    	SELECT  b_id as b_id,
+			    b_title as title,
+				b_content as contents,
+				b_writer as name,
+				p_board as p_board,
+				depth as depth,
+				grpord as grpord
+    	FROM sb_board
+    	WHERE
+    	b_id = #{b_id}
+    </select>
+    
+    <update id="updateBoard" parameterType="Board">
+	   		UPDATE sb_board
+	   		SET p_board = #{p_board}, depth = #{depth}, grpord = #{grpord}, b_title = #{title}
+	   		WHERE b_id = #{b_id} 	  
+    </update>
+    
+    <select id="boardList" resultType="Board">
+	      SELECT         b_id as b_id,
+				         b_title as title,
+				         b_content as contents,
+				         b_writer as name,
+				         p_board as p_board,
+				         depth as depth,
+				         grpord as grpord
+				         
+	      FROM            sb_board
+	      ORDER BY		p_board desc, grpord asc, depth asc
+	<!-- resultType : "Board"는 SQL 쿼리의 결과를 Board 객체로 매핑하겠다는 의미입니다. 
+	단, 이 쿼리는 여러 행을 return하고 있으므로 List<Board> 타입으로 return받아야 합니다. -->
+	 </select>
 
   
 </mapper>
