@@ -33,4 +33,9 @@ public class BoardServiceImpl implements BoardService  {
 	public List<Board> boardList(){
 		return boardMapper.boardList();
 	}
+	
+	@Override
+	public void boardDelete(int b_id) {
+		boardMapper.boardDelete(b_id);
+	}
 }

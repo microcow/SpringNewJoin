@@ -49,6 +49,12 @@
 	<!-- resultType : "Board"는 SQL 쿼리의 결과를 Board 객체로 매핑하겠다는 의미입니다. 
 	단, 이 쿼리는 여러 행을 return하고 있으므로 List<Board> 타입으로 return받아야 합니다. -->
 	 </select>
+	 
+	 <delete id="boardDelete" parameterType="int">
+	 	  DELETE FROM sb_board
+	   	  WHERE b_id = #{b_id}
+	 </delete>
+	 
 
   
 </mapper>

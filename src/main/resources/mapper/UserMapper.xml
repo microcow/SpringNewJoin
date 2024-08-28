@@ -7,7 +7,7 @@
         SELECT         u_auth
         FROM         sb_auth
         WHERE          1=1
-        AND            u_id = #{email}
+        AND            u_id = #{username}
     </select>
 
     <!-- 회원 불러오기 -->

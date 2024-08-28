@@ -16,4 +16,6 @@ public interface BoardMapper {
 	public Board readBoard(int b_id);
 	
 	public List<Board> boardList();
+	
+	public void boardDelete(int b_id);
 }

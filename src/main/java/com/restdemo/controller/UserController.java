@@ -12,7 +12,9 @@ import com.restdemo.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -124,6 +126,7 @@ public class UserController {
     @Secured({"ROLE_USER"})
     @PostMapping("/api/BoardList")
     public List<Board> BoardList(@AuthenticationPrincipal UserDetails userDetails){ // ★ @AuthenticationPrincipal UserDetails userDetails : doFilterInternal메서드에서 인증처리 후 인증된 사용자 정보를 받음
+    	System.out.println("=============");
     	List<Board> boardList = new ArrayList();
     	boardList = boardservice.boardList();
     	
@@ -135,8 +138,31 @@ public class UserController {
     public Board BoardDetail(@RequestBody String b_id, @AuthenticationPrincipal UserDetails userDetails){ // ★ @AuthenticationPrincipal UserDetails userDetails : doFilterInternal메서드에서 인증처리 후 인증된 사용자 정보를 받음
     	Board board = new Board();
     	board = boardservice.readBoard(Integer.parseInt(b_id));
-    	
     	return board;
+    }
+    
+    @Secured({"ROLE_USER"})
+    @PostMapping("/api/BoardDelete")
+    public Map<String, Object> BoardDelete(@RequestBody String b_id, @AuthenticationPrincipal UserDetails userDetails){ // ★ @AuthenticationPrincipal UserDetails userDetails : doFilterInternal메서드에서 인증처리 후 인증된 사용자 정보를 받음
+    	Map<String, Object> response = new HashMap<>();
+    	
+    	Board board = boardservice.readBoard(Integer.parseInt(b_id));
+    	if( // 현재 글의 작성자와 쿠키 유저의 Primary key가 일치하거나 권한이 ADMIN일 경우 RoleUser를 true로 설정
+    			board.getName().equals(userDetails.getUsername())  || 
+    			userDetails.getAuthorities().stream()
+    					   .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) 
+    	{
+    		boardservice.boardDelete(Integer.parseInt(b_id));
+    		 response.put("result", "Complete!");
+    		 response.put("roleUser", true);
+ 
+    		return response;
+    		
+    	}
+    	else
+    		response.put("result", "Fail...");
+			response.put("roleUser", false);
+			return response;
     }
     
     
