@@ -72,7 +72,8 @@ public class UserController {
     public ResponseEntity<Void> Signup(@RequestBody User user){ // ResponseEntity<Void>는 상태 코드만 반환하고, 추가적인 응답 본문이 필요 없는 경우 사용
     	
     	user.setPassword(passwordEncoder.encode(user.getPassword())); // BCryptPasswordEncoder를 주입받음 (BCryptPasswordEncoder 객체를 생성한 후, encode 메서드를 사용하여 비밀번호를 인코딩)
-    	
+    	// u_is 권한 1로 바꾸는 로직 추가해야함
+    	// auth 부여하는 로직 추가해야함
     	 try {
              userservice.createUser(user);
              return ResponseEntity.ok().build();  // HTTP 200 OK 반환
