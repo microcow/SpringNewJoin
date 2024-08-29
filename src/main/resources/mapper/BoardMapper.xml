@@ -35,6 +35,12 @@
 	   		WHERE b_id = #{b_id} 	  
     </update>
     
+    <update id="changeBoard" parameterType="Board">
+	   		UPDATE sb_board
+	   		SET b_title = #{title}, b_content = #{contents}, b_datetime = NOW()
+	   		WHERE b_id = #{b_id} 	  
+    </update>
+    
     <select id="boardList" resultType="Board">
 	      SELECT         b_id as b_id,
 				         b_title as title,

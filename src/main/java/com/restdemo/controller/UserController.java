@@ -135,10 +135,24 @@ public class UserController {
     
     @Secured({"ROLE_USER"})
     @PostMapping("/api/BoardDetail")
-    public Board BoardDetail(@RequestBody String b_id, @AuthenticationPrincipal UserDetails userDetails){ // ★ @AuthenticationPrincipal UserDetails userDetails : doFilterInternal메서드에서 인증처리 후 인증된 사용자 정보를 받음
-    	Board board = new Board();
-    	board = boardservice.readBoard(Integer.parseInt(b_id));
-    	return board;
+    public Map<String, Object> BoardDetail(@RequestBody String b_id, @AuthenticationPrincipal UserDetails userDetails){ // ★ @AuthenticationPrincipal UserDetails userDetails : doFilterInternal메서드에서 인증처리 후 인증된 사용자 정보를 받음
+    	Map<String, Object> response = new HashMap<>();
+    	
+    	Board board = boardservice.readBoard(Integer.parseInt(b_id));
+    	if( // 현재 글의 작성자와 글을 읽는 쿠키 유저의 Primary key가 일치하거나 권한이 ADMIN일 경우 RoleUser를 true로 설정
+    			board.getName().equals(userDetails.getUsername())  || 
+    			userDetails.getAuthorities().stream()
+    					   .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) 
+    	{
+    		 response.put("Board", board);
+    		 response.put("roleUser", true);
+    		 return response;
+    	}
+    	else
+    		response.put("Board", board);
+			response.put("roleUser", false);
+			return response;
+    	    	
     }
     
     @Secured({"ROLE_USER"})
@@ -163,6 +177,21 @@ public class UserController {
     		response.put("result", "Fail...");
 			response.put("roleUser", false);
 			return response;
+    }
+    
+    @Secured({"ROLE_USER"})
+    @PostMapping("/api/ChangeBoard")
+    public String ChangeBoard(@RequestBody Board board, @AuthenticationPrincipal UserDetails userDetails){ // ★ @AuthenticationPrincipal UserDetails userDetails : doFilterInternal메서드에서 인증처리 후 인증된 사용자 정보를 받음
+    	
+    	if(board.getContents() != null || board.getTitle() != null) {
+    		board.setName(userDetails.getUsername());
+    		
+    		boardservice.changeBoard(board);
+    
+    		return "Complete!";
+    	}
+    	else
+    	return "someting wrong...";
     }
     
     

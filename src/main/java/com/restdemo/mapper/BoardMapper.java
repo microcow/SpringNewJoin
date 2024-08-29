@@ -18,4 +18,6 @@ public interface BoardMapper {
 	public List<Board> boardList();
 	
 	public void boardDelete(int b_id);
+	
+	public void changeBoard(Board board);
 }
