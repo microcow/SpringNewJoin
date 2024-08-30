@@ -16,4 +16,6 @@ public interface BoardService {
 	public void boardDelete(int b_id);
 	
 	public void changeBoard(Board board);
+	
+	public void updateGrpord(Board board);
 }

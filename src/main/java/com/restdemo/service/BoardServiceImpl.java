@@ -43,4 +43,9 @@ public class BoardServiceImpl implements BoardService  {
 	public void changeBoard(Board board) {
 		boardMapper.changeBoard(board);
 	}
+	
+	@Override
+	public void updateGrpord(Board board) {
+		boardMapper.updateGrpord(board);
+	}
 }

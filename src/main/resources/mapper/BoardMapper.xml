@@ -8,11 +8,17 @@
         INSERT INTO sb_board (
         b_writer,
         b_title,
-        b_content
+        b_content,
+        p_board,
+        depth,
+        grpord
         ) VALUES (
         #{name},
         #{title},
-        #{contents}      
+        #{contents},
+        #{p_board},
+        #{depth},
+        #{grpord}      
         )
     </insert>
     
@@ -33,6 +39,13 @@
 	   		UPDATE sb_board
 	   		SET p_board = #{p_board}, depth = #{depth}, grpord = #{grpord}, b_title = #{title}
 	   		WHERE b_id = #{b_id} 	  
+    </update>
+    
+    <update id="updateGrpord" parameterType="Board">
+	   		UPDATE sb_board
+	   		SET grpord = grpord + 1
+	   		WHERE p_board = #{p_board}
+	   		AND grpord > #{grpord}
     </update>
     
     <update id="changeBoard" parameterType="Board">

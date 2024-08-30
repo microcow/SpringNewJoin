@@ -6,11 +6,13 @@ import com.restdemo.domain.JwtResponseDTO;
 import com.restdemo.domain.User;
 import com.restdemo.domain.UserAlreadyExistsException;
 import com.restdemo.service.BoardService;
+import com.restdemo.service.ImageService;
 import com.restdemo.service.JwtService;
 import com.restdemo.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +32,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController // 리턴되는 정보가 json 형태로 리턴된다 //jdk랑 그래들 버전 통일 (gredle8.9 / jdk22)
 public class UserController {
@@ -45,7 +48,10 @@ public class UserController {
     BoardService boardservice;    
     @Autowired
     AuthenticationManager authenticationManager; // 해당 authenticationManager객체는 authenticationManager메서드의 결과(return)를 담고있음
-
+    @Autowired
+    ImageService imageService;
+    
+    
     @PostMapping("/api/SetToken")
     public JwtResponseDTO AuthenticateAndGetToken(@RequestBody AuthRequestDTO authRequestDTO){ // @RequestBody 애노테이션은 프론트에서 보낸 요청의 본문(즉, body)을 Java 객체로 변환하는 데 사용
         Authentication authentication = authenticationManager.authenticate(
@@ -84,8 +90,6 @@ public class UserController {
              // 모든 UserAlreadyExistsException은 GlobalExceptionHandler에서 글로벌하게 관리됨
              // 즉, DuplicateKeyException이 발생하면 UserAlreadyExistsException로 포장하여 GlobalExceptionHandler로 보내짐
          }
-    	
- 
     }
     
     @PostMapping("/api/Signin")
@@ -103,6 +107,7 @@ public class UserController {
     	else return null;
     }
     
+    /* 이미지를 전송받지 않고, json 형태의 객체로 받고있음 아래에 이미지도 함께 받는 기능 구현완료 시 해당 메서드는 삭제 
     @Secured({"ROLE_USER"})
     @PostMapping("/api/CreateBoard")
     public String CreateBoard(@RequestBody Board board, @AuthenticationPrincipal UserDetails userDetails){ // ★ @AuthenticationPrincipal UserDetails userDetails : doFilterInternal메서드에서 인증처리 후 인증된 사용자 정보를 받음
@@ -118,6 +123,48 @@ public class UserController {
     			
     		boardservice.updateBoard(board);
     
+    		return "Complete!";
+    	}
+    	else
+    	return "someting wrong...";
+    } */
+    
+    @Secured({"ROLE_USER"})
+    @PostMapping("/api/CreateBoard")
+    public String CreateBoard(@RequestPart("title") String title, // @RequestPart는 FormData에서 JSON 데이터를 @RequestBody처럼 받고, 파일 데이터를 MultipartFile로 처리할 수 있습니다.
+    		                  @RequestPart("contents") String contents,
+    		                  @RequestPart("images") MultipartFile[] images, 
+                              @AuthenticationPrincipal UserDetails userDetails) { 
+    	Board board = new Board();
+    	
+    	if(contents != null || title != null) {
+    		board.setTitle(title);
+    		board.setContents(contents);
+    		board.setName(userDetails.getUsername());
+    		
+    		// 게시판 처리 로직
+    		boardservice.createBoard(board);
+    		
+    		board.setP_board(board.getB_id());
+    		board.setDepth(1);
+    		board.setGrpord(0);
+    			
+    		boardservice.updateBoard(board);
+    		
+    		
+    		// 이미지 처리 로직
+            for (MultipartFile image : images) {
+            	  try {
+                      byte[] imageBytes = image.getBytes();
+                      String imageName = image.getOriginalFilename();
+                      
+                      // 이미지 저장 (BLOB로 저장)
+                      imageService.saveImage(board.getB_id(), imageName, imageBytes);
+                  } catch (IOException e) {
+                      e.printStackTrace();
+                      return "Failed to save image";
+                  }
+            }
     		return "Complete!";
     	}
     	else
@@ -195,6 +242,31 @@ public class UserController {
     	return "someting wrong...";
     }
     
+    @Secured({"ROLE_USER"})
+    @PostMapping("/api/ReplyBoard")
+    public String ReplyBoard(@RequestBody Board board, @AuthenticationPrincipal UserDetails userDetails){ // ★ @AuthenticationPrincipal UserDetails userDetails : doFilterInternal메서드에서 인증처리 후 인증된 사용자 정보를 받음
+    	
+    	
+    	if(board.getContents() != null || board.getTitle() != null) {
+    		board.setName(userDetails.getUsername());
+    		
+    		Board pboard = boardservice.readBoard(board.getP_board()); // 부모글 불러오기
+    		board.setP_board(pboard.getP_board()); // 부모글과 동일한 p_board값 세팅 (답글의 답글일 경우 원글이 아닌 답글의 b_id 값을 p_board값으로 세팅하는 것을 방지) 
+    		board.setTitle("ㄴ " + board.getTitle());	
+    		board.setDepth(pboard.getDepth() +1);
+    		
+    		board.setGrpord(pboard.getGrpord()); // 부모글 grpord로 세팅한 다음
+    		boardservice.updateGrpord(board); // 부모글 보다 grpord 큰 애들 전부 각자 grpord값에서 +1 해주고
+    		board.setGrpord(board.getGrpord() + 1); // 해당 글은 부모글 grpord +1로 다시 세팅
+    		
+    		boardservice.createBoard(board);
+    		
+    
+    		return "Complete!";
+    	}
+    	else
+    	return "someting wrong...";
+    }
     
    
    
