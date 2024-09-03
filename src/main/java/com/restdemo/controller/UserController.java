@@ -138,7 +138,7 @@ public class UserController {
     public String CreateBoard( // ★ return타입이 String이지만, @RestController를 사용할 경우 오류 발생 시 자동으로 json타입으로 오류 객체가 return됨
     						  @RequestPart("title") String title, // @RequestPart는 FormData에서 JSON 데이터를 @RequestBody처럼 받고, 파일 데이터를 MultipartFile로 처리할 수 있습니다.
     		                  @RequestPart("contents") String contents,
-    		                  @RequestPart("images") MultipartFile[] images, 
+    		                  @RequestPart(value = "images", required = false) MultipartFile[] images, // ★ images 값이 없으면 받지 않음(즉, 있을때만 받음)
                               @AuthenticationPrincipal UserDetails userDetails) { 
     	Board board = new Board();
     	
@@ -158,6 +158,7 @@ public class UserController {
     		
     		
     		// 이미지 처리 로직
+    		if(images != null) {
             for (MultipartFile image : images) {
             	  try {
                       byte[] imageBytes = image.getBytes();
@@ -169,7 +170,8 @@ public class UserController {
                       e.printStackTrace();
                       return "Failed to save image";
                   }
-            }
+             }
+    		}
     		return "Complete!";
     	}
     	else
