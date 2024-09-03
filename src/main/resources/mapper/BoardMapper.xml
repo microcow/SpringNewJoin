@@ -29,7 +29,8 @@
 				b_writer as name,
 				p_board as p_board,
 				depth as depth,
-				grpord as grpord
+				grpord as grpord,
+				b_datetime as b_datetime
     	FROM sb_board
     	WHERE
     	b_id = #{b_id}

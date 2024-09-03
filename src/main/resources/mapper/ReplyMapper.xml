@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.restdemo.mapper.ReplyMapper">
+    
+    
+    <!-- 게시글 등록 -->
+    <insert id="CreateReply" parameterType="Reply" useGeneratedKeys="true" keyProperty="r_id">
+        INSERT INTO sb_reply (
+        r_writer,
+        b_id,
+        r_content,
+        p_rp,
+        r_depth,
+        r_grpord
+        ) VALUES (
+        #{r_writer},
+        #{b_id},
+        #{r_content},
+        #{p_rp},
+        #{r_depth},
+        #{r_grpord}      
+        )
+    </insert>
+    
+    <select id="ReplyList" resultType="Reply">
+	      SELECT         b_id as b_id,
+				         r_id as r_id,
+				         r_content as r_content,
+				         r_writer as r_writer,
+				         p_rp as p_rp,
+				         r_depth as r_depth,
+				         r_grpord as r_grpord
+				         
+	      FROM            sb_reply
+	      ORDER BY		p_rp desc, r_grpord asc, r_depth asc
+	 </select>
+    
+  
+</mapper>

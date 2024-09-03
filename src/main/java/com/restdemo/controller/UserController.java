@@ -3,11 +3,13 @@ package com.restdemo.controller;
 import com.restdemo.domain.AuthRequestDTO;
 import com.restdemo.domain.Board;
 import com.restdemo.domain.JwtResponseDTO;
+import com.restdemo.domain.Reply;
 import com.restdemo.domain.User;
 import com.restdemo.domain.UserAlreadyExistsException;
 import com.restdemo.service.BoardService;
 import com.restdemo.service.ImageService;
 import com.restdemo.service.JwtService;
+import com.restdemo.service.ReplyService;
 import com.restdemo.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,6 +52,8 @@ public class UserController {
     AuthenticationManager authenticationManager; // 해당 authenticationManager객체는 authenticationManager메서드의 결과(return)를 담고있음
     @Autowired
     ImageService imageService;
+    @Autowired
+    ReplyService replyservice;
     
     
     @PostMapping("/api/SetToken")
@@ -131,7 +135,8 @@ public class UserController {
     
     @Secured({"ROLE_USER"})
     @PostMapping("/api/CreateBoard")
-    public String CreateBoard(@RequestPart("title") String title, // @RequestPart는 FormData에서 JSON 데이터를 @RequestBody처럼 받고, 파일 데이터를 MultipartFile로 처리할 수 있습니다.
+    public String CreateBoard( // ★ return타입이 String이지만, @RestController를 사용할 경우 오류 발생 시 자동으로 json타입으로 오류 객체가 return됨
+    						  @RequestPart("title") String title, // @RequestPart는 FormData에서 JSON 데이터를 @RequestBody처럼 받고, 파일 데이터를 MultipartFile로 처리할 수 있습니다.
     		                  @RequestPart("contents") String contents,
     		                  @RequestPart("images") MultipartFile[] images, 
                               @AuthenticationPrincipal UserDetails userDetails) { 
@@ -186,6 +191,8 @@ public class UserController {
     public Map<String, Object> BoardDetail(@RequestBody String b_id, @AuthenticationPrincipal UserDetails userDetails){ // ★ @AuthenticationPrincipal UserDetails userDetails : doFilterInternal메서드에서 인증처리 후 인증된 사용자 정보를 받음
     	Map<String, Object> response = new HashMap<>();
     	
+    	List<Reply> reply = replyservice.ReplyList(Integer.parseInt(b_id)); // 댓글목록 불러오기
+    	
     	Board board = boardservice.readBoard(Integer.parseInt(b_id));
     	if( // 현재 글의 작성자와 글을 읽는 쿠키 유저의 Primary key가 일치하거나 권한이 ADMIN일 경우 RoleUser를 true로 설정
     			board.getName().equals(userDetails.getUsername())  || 
@@ -194,11 +201,13 @@ public class UserController {
     	{
     		 response.put("Board", board);
     		 response.put("roleUser", true);
+    		 response.put("Reply", reply);
     		 return response;
     	}
     	else
     		response.put("Board", board);
 			response.put("roleUser", false);
+			response.put("Reply", reply);
 			return response;
     	    	
     }
@@ -266,6 +275,36 @@ public class UserController {
     	}
     	else
     	return "someting wrong...";
+    }
+    
+    @Secured({"ROLE_USER"})
+    @PostMapping("/api/CreateReply") 
+    public String CreateReply( // 클라이언트에서 formdata형식으로 전달받으면 @RequestBody 어노테이션 사용 불가
+    						@RequestPart("b_id") String b_id, // 서버에서 b_id값을 Stirng타입으로 설정하여 보내고 있기에 String타입으로 받아야함
+    						@RequestPart("content") String content,
+    						@AuthenticationPrincipal UserDetails userDetails) { 
+    	Reply comment = new Reply();
+    	
+    	if(content != null) {
+    		comment.setB_id(Integer.parseInt(b_id));
+    		comment.setR_content(content);
+    		comment.setR_writer(userDetails.getUsername());
+    		
+    		replyservice.CreateReply(comment);
+    		
+    		/*
+    		board.setP_board(board.getB_id());
+    		board.setDepth(1);
+    		board.setGrpord(0);
+    		
+    			
+    		boardservice.updateBoard(board);
+    		*/
+    		
+    		return "Success!";
+            }
+    	else
+    		return "someting wrong...";
     }
     
    
